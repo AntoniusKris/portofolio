@@ -1,73 +1,64 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <title>PDF Flipbook Viewer</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <!-- ✅ Correct Flipbook CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/page-flip@2.0.7/dist/css/page-flip.min.css" />
-  <style>
-    body {
-      margin: 0;
-      background: #f0f0f0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-    #flipbook {
-      width: 90vw;
-      height: 90vh;
-      background: white;
-      box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
-    }
-  </style>
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+<script type="text/javascript" src="turn.js"></script>
+
+<style type="text/css">
+body{
+	background:#ccc;
+}
+#magazine{
+	width:1152px;
+	height:752px;
+}
+#magazine .turn-page{
+	background-color:#ccc;
+	background-size:100% 100%;
+}
+</style>
 </head>
-
 <body>
-  <div id="flipbook"></div>
 
-  <!-- Correct PageFlip version -->
-  <script src="https://unpkg.com/page-flip@2.0.7/dist/page-flip.min.js"></script>
+<div id="magazine">
+	<div style="background-image:url(pages/01.jpg);"></div>
+	<div style="background-image:url(pages/02.jpg);"></div>
+	<div style="background-image:url(pages/03.jpg);"></div>
+	<div style="background-image:url(pages/04.jpg);"></div>
+	<div style="background-image:url(pages/05.jpg);"></div>
+	<div style="background-image:url(pages/06.jpg);"></div>
+	<div style="background-image:url(pages/07.jpg);"></div>
+	<div style="background-image:url(pages/08.jpg);"></div>
+</div>
 
-  <!-- PDF.js -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
 
-  <script>
-    const container = document.getElementById("flipbook");
-    const pageFlip = new PageFlip.FlipBook(container, {
-      width: 600,
-      height: 800,
-      size: "stretch",
-      showCover: false,
-      maxShadowOpacity: 0.5,
-      useMouseEvents: true,
-      flippingTime: 700
-    });
+<script type="text/javascript">
 
-    async function renderPDF(url) {
-      const loadingTask = pdfjsLib.getDocument(url);
-      const pdf = await loadingTask.promise;
+	$(window).ready(function() {
+		$('#magazine').turn({
+							display: 'double',
+							acceleration: true,
+							gradients: !$.isTouch,
+							elevation:50,
+							when: {
+								turned: function(e, page) {
+									/*console.log('Current view: ', $(this).turn('view'));*/
+								}
+							}
+						});
+	});
+	
+	
+	$(window).bind('keydown', function(e){
+		
+		if (e.keyCode==37)
+			$('#magazine').turn('previous');
+		else if (e.keyCode==39)
+			$('#magazine').turn('next');
+			
+	});
 
-      const pages = [];
-      for (let i = 1; i <= pdf.numPages; i++) {
-        const page = await pdf.getPage(i);
-        const viewport = page.getViewport({ scale: 2 });
+</script>
 
-        const canvas = document.createElement("canvas");
-        canvas.width = viewport.width;
-        canvas.height = viewport.height;
-        const context = canvas.getContext("2d");
-
-        await page.render({ canvasContext: context, viewport }).promise;
-        pages.push(canvas.toDataURL());
-      }
-
-      const flipPages = pages.map(src => ({ src }));
-      pageFlip.loadFromImages(flipPages);
-    }
-
-    renderPDF("portofolio.pdf");
-  </script>
 </body>
 </html>
