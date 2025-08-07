@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>My Portfolio Flipbook</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/css/page-flip.min.css">
+  <meta charset="UTF-8" />
+  <title>PDF Flipbook Viewer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- ✅ Correct Flipbook CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/page-flip@2.0.7/dist/css/page-flip.min.css" />
   <style>
     body {
       margin: 0;
-      padding: 0;
       background: #f0f0f0;
       display: flex;
       justify-content: center;
@@ -17,54 +18,56 @@
     #flipbook {
       width: 90vw;
       height: 90vh;
-      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      background: white;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
     }
   </style>
 </head>
+
 <body>
   <div id="flipbook"></div>
 
-  <!-- Load PageFlip and PDF.js -->
-  <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.min.js"></script>
+  <!-- Correct PageFlip version -->
+  <script src="https://unpkg.com/page-flip@2.0.7/dist/page-flip.min.js"></script>
+
+  <!-- PDF.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
 
   <script>
-    const pdfPath = "portofolio.pdf";
-
     const container = document.getElementById("flipbook");
-    const pageFlip = new PageFlip.PageFlip(container, {
+    const pageFlip = new PageFlip.FlipBook(container, {
       width: 600,
       height: 800,
       size: "stretch",
-      maxShadowOpacity: 0.5,
       showCover: false,
+      maxShadowOpacity: 0.5,
       useMouseEvents: true,
       flippingTime: 700
     });
 
-    const renderPDF = async (url) => {
+    async function renderPDF(url) {
       const loadingTask = pdfjsLib.getDocument(url);
       const pdf = await loadingTask.promise;
 
       const pages = [];
-      for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-        const page = await pdf.getPage(pageNum);
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
         const viewport = page.getViewport({ scale: 2 });
-        const canvas = document.createElement("canvas");
-        const context = canvas.getContext("2d");
 
+        const canvas = document.createElement("canvas");
         canvas.width = viewport.width;
         canvas.height = viewport.height;
+        const context = canvas.getContext("2d");
 
         await page.render({ canvasContext: context, viewport }).promise;
         pages.push(canvas.toDataURL());
       }
 
-      const flipPages = pages.map((img) => ({ src: img }));
+      const flipPages = pages.map(src => ({ src }));
       pageFlip.loadFromImages(flipPages);
-    };
+    }
 
-    renderPDF(pdfPath);
+    renderPDF("portofolio.pdf");
   </script>
 </body>
 </html>
